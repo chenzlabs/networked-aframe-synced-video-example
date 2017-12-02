@@ -1,0 +1,119 @@
+<html>
+  <head>
+    <!-- Include A-Frame script. -->    
+    <script src="https://rawgit.com/aframevr/aframe/931210e/dist/aframe-master.min.js"></script>    
+
+    <!-- Include scripts for networked-aframe using easyrtc. -->    
+    <script src="https://unpkg.com/networked-aframe@^0.4.0/dist/networked-aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+    <script src="easyrtc/easyrtc.js"></script>
+        
+    <!-- Use a custom component to expose properties to networked-aframe. -->
+    <script src="video-transport.js"></script>
+    
+    <script>
+      var singletonSchema = {
+        template: '#singleton-template',
+        components: [
+          'position',
+          'rotation',          
+/*          
+          // This won't work when the video is referenced by selector!
+          // And some videos won't work this way regardless, due to CORS
+          // (What happened to the automatic video element creation code?)
+          {
+            selector: '.front',
+            component: 'material',
+            property: 'src'
+          },
+*/        
+          // This works but needs care when syncing, to avoid continual resync.
+          {
+            selector: '.front',
+            component: 'video-transport',
+            property: 'currentTime'
+          },
+          
+          // There may be an order of operations race condition to prevent,
+          // when restarting the position needs to be reset before play,
+          // or else the play will fail due to the end position.
+          {
+            selector: '.front',
+            component: 'video-transport',
+            property: 'paused'
+          }
+        ]
+      };
+      NAF.schemas.add(singletonSchema);
+    </script>
+  </head>
+  <body>
+    <a-scene networked-scene="
+      room: nafvideotransport;
+    ">
+      <a-assets>
+        <!-- This particular demo video needs crossorigin etc. -->
+        <video id="video" 
+               src="//edge.flowplayer.org/functional.mp4"
+               notsrc="https://videos.littlstar.com/7b5d6018-4cd6-466b-bf8b-79134d062147/web.mp4"
+               crossorigin="anonymous" autoplay playsinline="playsinline" loop></video>
+        
+        <!-- Templates -->
+
+        <!-- Because this video needs crossorigin etc., we need to use  
+             a-video src with selector, not a-plane material src string. -->
+        <script id="singleton-template" type="text/html">
+          <a-entity>
+            <a-video video-transport class="front" material="side:front"
+              src="#video"></a-video>
+            <a-plane class="back" rotation="0 180 0" material="color:red;side:front"
+              text="align:center;wrapCount:8;value:Hi back"></a-plane>
+          </a-entity>
+        </script>
+        
+        <!-- /Templates -->
+      </a-assets>
+
+      <!-- Note, for simplicity the avatar was removed. -->
+      <a-entity id="player" camera wasd-controls look-controls>
+      </a-entity>
+
+      <!-- Define the singleton (by using explicit networkId), with no initial owner. -->       
+      <a-entity class="singleton" position="0 0 -1" 
+                networked="template:#singleton-template;networkId:singleton;owner:nobody">
+      </a-entity>      
+    </a-scene>
+
+    <script>      
+      function onConnect () {
+        // The first client is the NOT only one that sees no other clients after connection,
+        // so it is NOT safe to take ownership of singletons immediately upon onConnect.
+        // We'll listen for a certain period, and if no client connections, take ownership.
+        // FIXME: How to determine the timeout?  Race condition.
+                
+        console.warn('onConnect() ', new Date());
+        
+        // Set up the lone ownership timeout.
+        var lonerTimeout = setTimeout(function() {
+          // This would be more useful if there were multiple singletons in the example.
+          Array.prototype.slice.call(document.querySelectorAll('.singleton[networked]'))
+            .map(function (el) {
+              // Take ownership.
+              el.setAttribute('networked', 'owner', NAF.clientId);
+              console.warn('Took ownership as ', NAF.clientId, ' of ', el);
+            });
+        }, 500);
+        
+        document.body.addEventListener('clientConnected', function (evt) {
+          console.warn('clientConnected ', evt.detail.clientId);          
+          // Cancel the lone ownership timeout.
+          clearTimeout(lonerTimeout);
+        });
+        
+        document.body.addEventListener('clientDisconnected', function (evt) {
+          console.warn('clientDisconnected ', evt.detail.clientId);
+        });
+      }
+    </script>
+  </body>
+</html>

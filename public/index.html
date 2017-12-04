@@ -63,7 +63,7 @@
         <!-- Because this video needs crossorigin etc., we need to use  
              a-video src with selector, not a-plane material src string. -->
         <script id="singleton-template" type="text/html">
-          <a-entity>
+          <a-entity scale="1.6 0.9 1">
             <a-video video-transport class="front" material="side:front"
               src="#video"></a-video>
             <a-plane class="back" rotation="0 180 0" material="color:red;side:front"
@@ -75,11 +75,11 @@
       </a-assets>
 
       <!-- Note, for simplicity the avatar was removed. -->
-      <a-entity id="player" camera wasd-controls look-controls>
+      <a-entity id="player" camera="userHeight:1.6" wasd-controls look-controls>
       </a-entity>
 
       <!-- Define the singleton (by using explicit networkId), with no initial owner. -->       
-      <a-entity class="singleton" position="0 0 -1" 
+      <a-entity class="singleton" position="0 1.6 -1" 
                 networked="template:#singleton-template;networkId:singleton;owner:nobody">
       </a-entity>      
     </a-scene>

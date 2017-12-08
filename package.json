@@ -2,9 +2,9 @@
   "//1": "describes your app and its dependencies",
   "//2": "https://docs.npmjs.com/files/package.json",
   "//3": "updating this file will download and update your packages",
-  "name": "networked-aframe-glitch",
+  "name": "networked-aframe-synced-video-example",
   "version": "0.0.1",
-  "description": "What am I about?",
+  "description": "A-Frame example using networked-aframe with a custom component for roughly synchronized multi-user video viewing.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -16,7 +16,7 @@
     "node": "6.9.x"
   },
   "repository": {
-    "url": "https://glitch.com/#!/project/networked-aframe"
+    "url": "https://glitch.com/#!/project/networked-aframe-synced-video-example"
   },
   "license": "MIT",
   "keywords": [

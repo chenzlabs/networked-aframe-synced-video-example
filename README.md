@@ -10,7 +10,7 @@ When trying to synchronize video position, care needs to be taken to avoid repea
 
 Creating singleton objects in networked-aframe is not yet encapsulated in a component; the crude approach taken here is to define the singleton(s) by using an explicit `networkId` value and no initial owner (more specifically, an initial `owner` that is invalid), along with JavaScript that waits a little bit to see if a client is the only/first, and if so then takes ownership of the singleton(s).
 
-(Updated to place the video at eye height when in VR, and to use the correct aspect ratio for the particilar demo video.)
+(Updated to place the video at eye height when in VR, and to use the correct aspect ratio for the particular demo video.)
 
 Enjoy!
 - M
